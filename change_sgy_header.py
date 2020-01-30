@@ -49,6 +49,7 @@ for j, file in enumerate(files):
     byte_min = sgy.TraceField.MinuteOfHour
     byte_sec = sgy.TraceField.SecondOfMinute
     
+    # date information from trace headers
     yr = [str(h[i][byte_yr]) for i in range(n)]  
     jday = [str(h[i][byte_jday]) for i in range(n)]
     
@@ -70,26 +71,25 @@ for j, file in enumerate(files):
         hr_list.append(hr)
         mn_list.append(mn)
         sec_list.append(ss)
-        
-        
-    date_trace = [int('19' + y + j + h + m + s) for y,j,h,m,s in zip(yr,jday,hr_list,mn_list,sec_list)]
-    utc_date_trace = [UTCDateTime(1900 + int(y), julday = int(j), hour =  int(h), minute = int(m), second =  int(s)) for y,j,h,m,s in zip(yr,jday,hr_list,mn_list,sec_list)]
-    
+                
+    date_trace = [int('19' + y + j + h + m + s) for y,j,h,m,s in zip(yr,jday,hr_list,mn_list,sec_list)]    
     date_nav = [int(str(d)[:-1]) for d in nav.datetime]
     
+    
+    ## compare date/time from gps navigation to traces and populate source x&y location 
     tic = time.time()
     for i, date in enumerate(date_trace):
-        index_closest_time = np.abs(date - np.array(date_nav)).argmin()
+        index_closest_time = np.abs(date - np.array(date_nav)).argmin() #gets index of closest time between trace and navigation
         lat_near = nav.lat[index_closest_time]
         lon_near = nav.lon[index_closest_time]
-        utm_coords = utm.from_latlon(lat_near, lon_near)
+        utm_coords = utm.from_latlon(lat_near, lon_near) #calculate utm coord b/c segy headers do not take floats
         
-        easting = remove_decimal(utm_coords[0])
+        easting = remove_decimal(utm_coords[0]) #remove decimal using function above
         northing = remove_decimal(utm_coords[1])
         
-        h[i][sgy.TraceField.SourceX] = easting
+        h[i][sgy.TraceField.SourceX] = easting #assign source locations
         h[i][sgy.TraceField.SourceY] = northing
-        h[i][sgy.TraceField.SourceGroupScalar] = -100
+        h[i][sgy.TraceField.SourceGroupScalar] = -100 #scaler that recomputes to account for moving decimal
     toc = time.time()
     print(file, ' run time = ',toc-tic)
     
