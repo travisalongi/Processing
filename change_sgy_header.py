@@ -4,7 +4,7 @@
 Created on Mon Jan 27 13:50:44 2020
 Update segy header with navigation file information that contains time & lat/lon
 processed all lines that are full lines, not turns *b.segy
-@author: talongi
+@author: Travis Alongi
 """
 import os 
 import time
