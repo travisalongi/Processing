@@ -1,0 +1,5 @@
+#+TITLE: Readme
+#+AUTHOR: Travis Alongi
+
+* Purpose
+Repository for codes used to aid in processing legacy seismic lines.
