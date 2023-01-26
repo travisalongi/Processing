@@ -1,0 +1,35 @@
+#+TITLE: Readme
+
+* <2021-08-09 Mon>
+** changing l490 sc headers in /legacy_cmp_srt
+backup of originals contained in /legacy_cmp_srt_backup
+
+
+* <2021-08-10 Tue>
+** Change headers complete
+Significant problems running code
+Htop status showed D after 1 pass through loop
+Had to restart script and change the file for each file
+Tried different mounting options - regular mounting of shared file system lagged linux system very bad
+Mounted with ntfs and ntfs-3g still had problems
+Tried moving files to vagabond still had problems
+Lines 127 and 130 did not have navigation recorded in in the .410 file
+Will proceed without using these
+*** Navigation information does not exist for the times during line 130, cannot use this line
+* Current /*processed directories cannot be used to upload to USGS page due to lack of navigation in headers
+   
+* <2023-01-24 Tue> 
+  - Played with change_sgy_header_L490.py appears to work
+  - May still have some problems with navigation being correct in pre-stack data
+  - Will wait to meet with ABG tomorrow to discuss what to do.
+
+
+* <2023-01-25 Wed> 
+  - Checked the L490 stuff on Reveal w/ ABG and after some digging found that
+    the problem was with how I was looping through traces. This did not
+    account for gaps in the data, so it scrunched some navigation to earlier 
+    ffid numbers, and left the end of line without corrected navigation
+  - debugged this code with debug_change_sgy_header_L490.py on test line 125
+  - Then cleaned up this code and looped through lines with problems
+    fixed_change_sgy_header_L490.py
+
