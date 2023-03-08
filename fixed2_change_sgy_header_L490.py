@@ -54,7 +54,7 @@ byte_srcx = sgt.SourceX
 byte_srcy = sgt.SourceY
 
 # Loop through and fix lines
-for j, file in enumerate(files[:]):
+for j, file in enumerate(files[7:]):
     print("Processing file {}".format(file))
     print("Starting file at {}".format(str(datetime.datetime.now())))
     tic = time.time()

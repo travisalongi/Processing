@@ -42,6 +42,12 @@ Will proceed without using these
     at either edge. I'm going to ignore this for now and see if other problems 
     arise.
   - Incorporated these changes into fixed2_change_sgy_header_L490.py
-  - Have run 101, 102, 103 this evening. Will continue later. Each line 
+  - Have run 101, 102, 103 later. Each line 
     takes about 800 seconds to process
 
+* <2023-03-08 Wed> finish the rest of the lines 
+  - [3:] in the loop
+  - Seems to slow down significantly after a few lines
+  - Ran through 107a restart wsl2 [7:] need to start at 109a
+  - This line has taken ~70 minutes already
+ 
