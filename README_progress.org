@@ -33,3 +33,15 @@ Will proceed without using these
   - Then cleaned up this code and looped through lines with problems
     fixed_change_sgy_header_L490.py
 
+* <2023-03-07 Tue> Fix errors on other lines 
+  - Per ABG email there are additional navigation errors on many other lines
+    See L490SC_nav2_issues.csv
+  - Will see how the fixed code does with 128a first. I'll use debug_change_sgy_header_L490.py
+  - Decided to try to populate navigation based on the shot point from the nav 
+    (410 file) The shotpoints (ffids) are nearly complete but are missing ~1-15
+    at either edge. I'm going to ignore this for now and see if other problems 
+    arise.
+  - Incorporated these changes into fixed2_change_sgy_header_L490.py
+  - Have run 101, 102, 103 this evening. Will continue later. Each line 
+    takes about 800 seconds to process
+

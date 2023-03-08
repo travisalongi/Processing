@@ -1,4 +1,4 @@
-"""
+""":
 Updated Aug. 2021
 Updated Jan. 2023 - Fixed errors lines with gaps ~5 lines.
 
@@ -64,22 +64,25 @@ nav["utc_datetime"] = times
 nav["datetime"] = [int(t[:-1]) for t in nav.datetime.astype(str).values]
 
 # Create new columns of line numbers
-nav_line = nav.line.to_list()
-nav_num = [l.split("-")[-1] for l in nav_line]
+nav_line_list = nav.line.to_list()
+nav_num = [l.split("-")[-1] for l in nav_line_list]
 nav["line_num"] = nav_num
 
 # Get file names / paths
 data_dir = "legacy_cmp_srt"
-files = ["105", "107",  "113", "125"]
-files = [data_dir + "/l4srt" + f + ".sgy" for f in files]
+files = glob.glob(data_dir + "/*.sgy")
 
 # Set segy byte information
 sgt = sgy.TraceField
+byte_ffid = sgt.FieldRecord 
+byte_tr_num = sgt.TraceNumber
 byte_yr = sgt.YearDataRecorded
 byte_jday = sgt.DayOfYear
 byte_hr = sgt.HourOfDay
 byte_min = sgt.MinuteOfHour
 byte_sec = sgt.SecondOfMinute
+byte_srcx = sgt.SourceX
+byte_srcy = sgt.SourceY
 
 # Loop through and fix lines
 plt.figure()
@@ -88,7 +91,7 @@ for j, file in enumerate(files[:]):
     print("Processing file {}".format(file))
     print("Starting file at {}".format(str(datetime.datetime.now())))
     tic = time.time()
-    line_number = file.split("/")[-1].split(".")[0].split("t")[-1]
+    line_number = file.split("/")[-1].split(".")[0].split("t")[-1][:3]
     f = sgy.open(file, "r+", ignore_geometry=True)
 
     h = f.header  # All trace headers
@@ -96,6 +99,7 @@ for j, file in enumerate(files[:]):
 
     # Navigation subset
     nav_line = nav[nav.line_num == line_number]
+    print("Navigation loaded for {}".format(line_number))
 
     yr, jday, hr_list, mn_list, sec_list = [], [], [], [], []
     for i in range(n):
@@ -138,7 +142,7 @@ for j, file in enumerate(files[:]):
     date_trace, date_trace_utc, err_mask = [], [], []
     for y, jd, hr1, m, s in zip(yr, jday, hr_list, mn_list, sec_list):
         # This is specifically for this survey: time1 not always correct
-        if int(y) == 0:
+        if (int(y) == 0) or (int(jd) == 0):
             err_mask.append(False)
             # Place holders for traces w/o time1 in headers
             date_trace.append("0")
