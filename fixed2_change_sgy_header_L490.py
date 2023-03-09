@@ -54,63 +54,64 @@ byte_srcx = sgt.SourceX
 byte_srcy = sgt.SourceY
 
 # Loop through and fix lines
-for j, file in enumerate(files[7:]):
+for j, file in enumerate(files[23:]):
     print("Processing file {}".format(file))
     print("Starting file at {}".format(str(datetime.datetime.now())))
     tic = time.time()
     line_number = file.split("/")[-1].split(".")[0].split("t")[-1][:3]
-    f = sgy.open(file, "r+", ignore_geometry=True)
 
-    h = f.header    # All trace headers
-    n = len(h)      # Total number of traces
 
-    # Navigation subset
-    nav_line = nav[nav.line_num == line_number]
-    print(nav_line.shot.min(), nav_line.shot.max())
-    
-    ffids = np.zeros([n])
-    for i in range(n):
-        ffid = h[i][byte_ffid]
-        ffids[i] = ffid
-        if ffid in nav_line.shot.values:
-    
-            # Match to ffid in header to 410 file
-            nav_trace = nav_line[nav_line.shot == ffid]
+    with sgy.open(file, "r+", ignore_geometry=True) as f:
+
+        h = f.header    # All trace headers
+        n = len(h)      # Total number of traces
+
+        # Navigation subset
+        nav_line = nav[nav.line_num == line_number]
+        print(nav_line.shot.min(), nav_line.shot.max(), n, str(datetime.datetime.now()))
         
-            # Normal condition navigation exists for ffid
-            if nav_trace.size > 0:
-                coords = utm.from_latlon(nav_trace.lat.values, nav_trace.lon.values)
-                easting, northing = (
-                    remove_decimal(coords[0])[0],
-                    remove_decimal(coords[1])[0],
-                )
+        ffids = np.zeros([n])
+        for i in range(n):
+            ffid = h[i][byte_ffid]
+            ffids[i] = ffid
+            if ffid in nav_line.shot.values:
         
-                h[i][byte_srcx] = easting
-                h[i][byte_srcy] = northing
-        
-                # Scaler that recomputes to account for moving decimal
-                h[i][sgy.TraceField.SourceGroupScalar] = -100
-        
-            # Fix for when shot point (ffid is missing from 410)
-            else:
-                print("No Navigation for FFID %i" % ffid)
-        
-                # Take the mean of the shot loc. before and after the missing data
-                nav_trace = nav_line[
-                    (nav_line.shot <= ffid + 1) & (nav_line.shot >= ffid - 1)
-                ]
-                coords = utm.from_latlon(nav_trace.lat.mean(), nav_trace.lon.mean())
-                easting, northing = (
-                    remove_decimal([coords[0]])[0],
-                    remove_decimal([coords[1]])[0],
-                )
-        
-                h[i][byte_srcx] = easting
-                h[i][byte_srcy] = northing
-        
-                # Scaler that recomputes to account for moving decimal
-                h[i][sgy.TraceField.SourceGroupScalar] = -100
-        
-    toc = time.time()
-    print(file, " run time1 = ", toc - tic, "\n")
-    f.close
+                # Match to ffid in header to 410 file
+                nav_trace = nav_line[nav_line.shot == ffid]
+            
+                # Normal condition navigation exists for ffid
+                if nav_trace.size > 0:
+                    coords = utm.from_latlon(nav_trace.lat.values, nav_trace.lon.values)
+                    easting, northing = (
+                        remove_decimal(coords[0])[0],
+                        remove_decimal(coords[1])[0],
+                    )
+            
+                    h[i][byte_srcx] = easting
+                    h[i][byte_srcy] = northing
+            
+                    # Scaler that recomputes to account for moving decimal
+                    h[i][sgy.TraceField.SourceGroupScalar] = -100
+            
+                # Fix for when shot point (ffid is missing from 410)
+                else:
+                    print("No Navigation for FFID %i" % ffid)
+            
+                    # Take the mean of the shot loc. before and after the missing data
+                    nav_trace = nav_line[
+                        (nav_line.shot <= ffid + 1) & (nav_line.shot >= ffid - 1)
+                    ]
+                    coords = utm.from_latlon(nav_trace.lat.mean(), nav_trace.lon.mean())
+                    easting, northing = (
+                        remove_decimal([coords[0]])[0],
+                        remove_decimal([coords[1]])[0],
+                    )
+            
+                    h[i][byte_srcx] = easting
+                    h[i][byte_srcy] = northing
+            
+                    # Scaler that recomputes to account for moving decimal
+                    h[i][sgy.TraceField.SourceGroupScalar] = -100
+            
+        toc = time.time()
+        print(file, " run time1 = ", toc - tic, "\n")
