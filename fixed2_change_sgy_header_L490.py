@@ -14,6 +14,8 @@ import os, time, glob, utm, datetime
 import pandas as pd
 import numpy as np
 import segyio as sgy
+import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
 
 
 # Set some function definitions
@@ -27,6 +29,12 @@ def remove_decimal(numbers, places_after_decimal_to_retain=2):
         new_numbers.append(new_number)
     return new_numbers
 
+def parametric_interpolation(x, y, t, type="linear"):
+    """Takes arrays of x, y, t parameterizes on t and returns interpolation
+    of f(x(t)) and f(y(t)) as a tuple"""
+    fx_t = interp1d(t, x, fill_value="extrapolate")
+    fy_t = interp1d(t, y, fill_value="extrapolate")
+    return fx_t, fy_t
 
 # Import navigation (GPS) data
 nav = pd.read_csv(
@@ -50,11 +58,13 @@ files = glob.glob(data_dir + "/*.sgy")
 # Set segy byte information
 sgt = sgy.TraceField
 byte_ffid = sgt.FieldRecord
+byte_cdp = sgt.CDP
 byte_srcx = sgt.SourceX
 byte_srcy = sgt.SourceY
 
 # Loop through and fix lines
-for j, file in enumerate(files[23:]):
+plt.figure()
+for j, file in enumerate(files[2:27]):
     print("Processing file {}".format(file))
     print("Starting file at {}".format(str(datetime.datetime.now())))
     tic = time.time()
@@ -68,50 +78,59 @@ for j, file in enumerate(files[23:]):
 
         # Navigation subset
         nav_line = nav[nav.line_num == line_number]
-        print(nav_line.shot.min(), nav_line.shot.max(), n, str(datetime.datetime.now()))
+        print(nav_line.cdp.min(), nav_line.cdp.max(), n, str(datetime.datetime.now()))
+
+        # Parameterize navigation - to account for odd cpds in the segy
+        fx, fy = parametric_interpolation(nav_line.lon, nav_line.lat, nav_line.cdp)
         
         ffids = np.zeros([n])
+        cdps = np.zeros([n])
+        xs, ys = np.zeros([n]), np.zeros([n])
         for i in range(n):
+
             ffid = h[i][byte_ffid]
             ffids[i] = ffid
-            if ffid in nav_line.shot.values:
-        
-                # Match to ffid in header to 410 file
-                nav_trace = nav_line[nav_line.shot == ffid]
-            
-                # Normal condition navigation exists for ffid
-                if nav_trace.size > 0:
-                    coords = utm.from_latlon(nav_trace.lat.values, nav_trace.lon.values)
-                    easting, northing = (
-                        remove_decimal(coords[0])[0],
-                        remove_decimal(coords[1])[0],
-                    )
-            
-                    h[i][byte_srcx] = easting
-                    h[i][byte_srcy] = northing
-            
-                    # Scaler that recomputes to account for moving decimal
-                    h[i][sgy.TraceField.SourceGroupScalar] = -100
-            
-                # Fix for when shot point (ffid is missing from 410)
-                else:
-                    print("No Navigation for FFID %i" % ffid)
-            
-                    # Take the mean of the shot loc. before and after the missing data
-                    nav_trace = nav_line[
-                        (nav_line.shot <= ffid + 1) & (nav_line.shot >= ffid - 1)
-                    ]
-                    coords = utm.from_latlon(nav_trace.lat.mean(), nav_trace.lon.mean())
-                    easting, northing = (
-                        remove_decimal([coords[0]])[0],
-                        remove_decimal([coords[1]])[0],
-                    )
-            
-                    h[i][byte_srcx] = easting
-                    h[i][byte_srcy] = northing
-            
-                    # Scaler that recomputes to account for moving decimal
-                    h[i][sgy.TraceField.SourceGroupScalar] = -100
-            
-        toc = time.time()
-        print(file, " run time1 = ", toc - tic, "\n")
+            cdp = h[i][byte_cdp]
+            cdps[i] = cdp
+
+            # Interpolate the lat/lon from the cdp info
+            mod_lon, mod_lat = fx(cdp), fy(cdp)
+      
+            # Normal condition navigation exists for ffid
+            coords = utm.from_latlon(mod_lat, mod_lon)
+            easting, northing = (
+                remove_decimal([coords[0]])[0],
+                remove_decimal([coords[1]])[0],
+            )
+  
+            h[i][byte_srcx] = easting
+            h[i][byte_srcy] = northing
+            xs[i] = easting
+            ys[i] = northing
+  
+            # Scaler that recomputes to account for moving decimal
+            h[i][sgy.TraceField.SourceGroupScalar] = -100
+
+                #          
+                # # Fix for when shot point (ffid is missing from 410)
+                # else:
+                #     print("No Navigation for CDP %i" % cdp)
+                #          
+                #     # Take the mean of the shot loc. before and after the missing data
+                #     nav_trace = nav_line[
+                #         (nav_line.shot <= ffid + 1) & (nav_line.shot >= ffid - 1)
+                #     ]
+                #     coords = utm.from_latlon(nav_trace.lat.mean(), nav_trace.lon.mean())
+                #     easting, northing = (
+                #         remove_decimal([coords[0]])[0],
+                #         remove_decimal([coords[1]])[0],
+                #     )
+                #          
+                #     h[i][byte_srcx] = easting
+                #     h[i][byte_srcy] = northing
+                #          
+                #     # Scaler that recomputes to account for moving decimal
+                #     h[i][sgy.TraceField.SourceGroupScalar] = -100
+          
+    toc = time.time()
+    print(file, " run time1 = ", toc - tic, "\n")

@@ -1,0 +1,5 @@
+
+*.segy
+*.sgy
+.DS_STORE
+*.410

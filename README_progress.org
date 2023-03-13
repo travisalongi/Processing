@@ -50,4 +50,10 @@ Will proceed without using these
   - Seems to slow down significantly after a few lines
   - Ran through 107a restart wsl2 [7:] need to start at 109a
   - This line has taken ~70 minutes already
+  - Need to continue from 124a
+  - Drive has slowed to a crawl. Copied over to abg 4 tb formatted and renamed wayfarer
+  - Trying again at 4:35 will let run for about half an hour before going home
+  - Much faster... left off on line 126
+  - Running again on wayfarer
+  - Finished! Runs take ~150s
  

@@ -1,0 +1,34 @@
+line,issues
+101,few nav drop outs but no biggie
+102,one nav drop out no biggie
+103,many little drop outs but ok
+104,couple but ok
+105,no nav issues but muted too early?
+106,couple little drop outs but fine
+107,ok
+109a,ok
+109b,ok
+110,end ~150 cmps missing nav 
+111,ok
+112a,ok
+112b,ok
+113,ok
+114,couple of dropouts no biggie
+115,major issues no src y nav and missing first ~1000 cmps of src x nav
+116,couple missing nav points but ok - need to repick the end mute table
+117,last 30ish cmps missing nav 
+118,missing nav for almost half the line
+119,ok
+120a,last 100ish cmps missing nav
+120b,first and alst ~1000+ cmps missing nav
+121,last 50 cmps have no nav
+122,last~80cmps missing nav
+123,first 100cmps and last 400 cmps have messed up nav
+124a,first 300 and last 2200 cmps have messed up nav shutdown in middle is ok
+124b,last 200 cmps missing nav\, few shutdowns are ok
+125,maybe bottom mute is too shallow?
+126,all data is muted?
+128a,most nav is messed up
+128b,last 50 cmps missing nav but ok
+131,last 400 cmps have messed up nav
+,
